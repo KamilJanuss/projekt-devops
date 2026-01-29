@@ -1,0 +1,12 @@
+name: 'Przywitanie'
+description: 'Wypisuje kto uruchomil pipeline'
+inputs:
+  user:
+    description: 'Nazwa uzytkownika'
+    required: true
+    default: 'Student'
+runs:
+  using: "composite"
+  steps:
+    - run: echo "Czesc ${{ inputs.user }}! Uruchamiam pipeline zaliczeniowy."
+      shell: bash

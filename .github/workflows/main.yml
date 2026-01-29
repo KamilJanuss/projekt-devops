@@ -1,0 +1,53 @@
+name: Projekt DevOps Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  testy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Ustawienie Pythona
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Instalacja bibliotek
+        run: pip install -r requirements.txt
+
+      - name: Uruchomienie testow
+        run: pytest
+
+  budowanie-obrazu:
+    needs: testy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Moja akcja
+        uses: ./.github/actions/hello
+        with:
+          user: ${{ github.actor }}
+
+      - name: Logowanie do GitHub Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Budowanie i push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/projekt-zaliczeniowy:latest
